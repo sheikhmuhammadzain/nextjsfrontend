@@ -4,10 +4,11 @@ import { useState, useRef, KeyboardEvent } from 'react';
 
 interface ChatInputProps {
   onSubmit: (query: string) => void;
+  onUpload?: (file: File) => void;
   isStreaming: boolean;
 }
 
-export function ChatInput({ onSubmit, isStreaming }: ChatInputProps) {
+export function ChatInput({ onSubmit, onUpload, isStreaming }: ChatInputProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -34,8 +35,39 @@ export function ChatInput({ onSubmit, isStreaming }: ChatInputProps) {
     e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && onUpload) {
+      onUpload(e.target.files[0]);
+      e.target.value = ''; // Reset input
+    }
+  };
+
   return (
     <div className="relative flex items-end gap-2">
+      {onUpload && (
+        <div className="pb-1">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*,.pdf"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isStreaming}
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-muted disabled:opacity-50"
+            title="Upload document"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="relative flex-1">
         <textarea
           ref={textareaRef}
@@ -46,7 +78,7 @@ export function ChatInput({ onSubmit, isStreaming }: ChatInputProps) {
           disabled={isStreaming}
           rows={1}
           className="w-full resize-none px-5 py-3.5 pr-14 text-sm font-medium focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all placeholder:text-muted-foreground"
-          style={{ 
+          style={{
             maxHeight: '200px',
             background: 'var(--input)',
             color: 'var(--foreground)',

@@ -4,7 +4,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export async function POST(request: NextRequest) {
   try {
-    const { query } = await request.json();
+    // Get auth token from request headers
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { query, chatId } = await request.json();
+
+    // Note: Chat history is now stored on the client side in localStorage
+    // For production, you may want to add server-side chat persistence
 
     // Fetch from FastAPI backend
     const response = await fetch(`${API_BASE_URL}/api/query/stream`, {

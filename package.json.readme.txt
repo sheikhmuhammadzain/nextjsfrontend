@@ -1,0 +1,13 @@
+If you see TypeScript errors, they will resolve once npm install finishes.
+
+Required dependencies:
+- next-auth@latest
+- mongodb
+- bcryptjs
+- @types/bcryptjs (dev)
+
+These are currently being installed in the background.
+Once installation completes, restart your dev server:
+  npm run dev
+
+Then open: http://localhost:3000
