@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login, register } from '@/lib/auth';
 
+import Image from 'next/image';
+
 interface AuthFormProps {
   mode: 'login' | 'signup';
   onToggleMode: () => void;
@@ -52,13 +54,14 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <div className="text-sm font-semibold tracking-tight" style={{ color: 'var(--foreground)' }}>
-            UOL
-          </div>
-          <div className="h-8 w-px" style={{ background: 'var(--border)' }}></div>
-          <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-            Online Admission System
-          </div>
+          <Image
+            src="/logo.webp"
+            alt="University of Lahore"
+            width={200}
+            height={60}
+            className="object-contain"
+            priority
+          />
         </div>
         <h1 className="text-2xl font-semibold tracking-tight mt-6" style={{ color: 'var(--foreground)' }}>
           {mode === 'login' ? 'Login' : 'Sign Up'}

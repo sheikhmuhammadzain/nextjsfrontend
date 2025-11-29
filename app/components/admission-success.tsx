@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import Image from 'next/image';
 
 interface AdmissionSuccessProps {
     applicationId: string;
@@ -22,14 +23,17 @@ export function AdmissionSuccess({ applicationId, formData, onClose }: Admission
             {/* Header */}
             <div className="bg-primary text-primary-foreground p-8 text-center print:bg-white print:text-black print:border-b-2 print:border-black">
                 <div className="flex justify-center mb-4">
-                    <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center text-primary print:border-2 print:border-black">
-                        <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
+                    <div className="relative h-20 w-64">
+                        <Image
+                            src="/logo.webp"
+                            alt="University of Lahore"
+                            fill
+                            className="object-contain brightness-0 invert print:filter-none print:brightness-0" // Make it white for orange bg, black for print
+                            priority
+                        />
                     </div>
                 </div>
-                <h2 className="text-3xl font-bold mb-2">University of Lahore</h2>
-                <p className="text-primary-foreground/80 print:text-black">Admission Application Slip</p>
+                <p className="text-primary-foreground/80 print:text-black font-medium">Admission Application Slip</p>
             </div>
 
             {/* Content */}
