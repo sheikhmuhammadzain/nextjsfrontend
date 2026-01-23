@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 
@@ -10,30 +11,73 @@ interface AdmissionSuccessProps {
 }
 
 export function AdmissionSuccess({ applicationId, formData, onClose }: AdmissionSuccessProps) {
-    const handlePrint = () => {
-        window.print();
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleDownloadPDF = async () => {
+        setIsDownloading(true);
+        setError(null);
+
+        try {
+            const response = await fetch('/api/admission/generate-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    application_id: applicationId,
+                    form_data: formData,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate PDF');
+            }
+
+            // Get the PDF blob
+            const blob = await response.blob();
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Admission_Slip_${applicationId}.pdf`;
+
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('PDF download error:', err);
+            setError('Failed to download PDF. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-neutral-200 my-8 print:shadow-none print:border-none print:my-0 print:w-full print:max-w-none"
+            className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-neutral-200 my-8"
         >
             {/* Header */}
-            <div className="bg-primary text-primary-foreground p-8 text-center print:bg-white print:text-black print:border-b-2 print:border-black">
+            <div className="bg-primary text-primary-foreground p-8 text-center">
                 <div className="flex justify-center mb-4">
                     <div className="relative h-20 w-64">
                         <Image
                             src="/logo.webp"
                             alt="University of Lahore"
                             fill
-                            className="object-contain brightness-0 invert print:filter-none print:brightness-0" // Make it white for orange bg, black for print
+                            className="object-contain brightness-0 invert"
                             priority
                         />
                     </div>
                 </div>
-                <p className="text-primary-foreground/80 print:text-black font-medium">Admission Application Slip</p>
+                <p className="text-primary-foreground/80 font-medium">Admission Application Slip</p>
             </div>
 
             {/* Content */}
@@ -100,14 +144,21 @@ export function AdmissionSuccess({ applicationId, formData, onClose }: Admission
                     </div>
                 </div>
 
-                <div className="text-xs text-muted-foreground text-center pt-8 print:pt-16">
+                <div className="text-xs text-muted-foreground text-center pt-8">
                     <p>This is a computer-generated document. No signature is required.</p>
                     <p className="mt-1">Please bring this slip along with your original documents for the interview.</p>
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+                        <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                )}
             </div>
 
             {/* Footer Actions */}
-            <div className="bg-neutral-50 p-6 flex justify-between items-center print:hidden">
+            <div className="bg-neutral-50 p-6 flex justify-between items-center">
                 <button
                     onClick={onClose}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -115,15 +166,29 @@ export function AdmissionSuccess({ applicationId, formData, onClose }: Admission
                     Start New Application
                 </button>
                 <button
-                    onClick={handlePrint}
-                    className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                    onClick={handleDownloadPDF}
+                    disabled={isDownloading}
+                    className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download / Print
+                    {isDownloading ? (
+                        <>
+                            <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating PDF...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download PDF
+                        </>
+                    )}
                 </button>
             </div>
         </motion.div>
     );
 }
+

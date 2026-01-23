@@ -37,16 +37,9 @@ export function ChatInterface({ initialChat }: ChatInterfaceProps = {}) {
   };
 
   useEffect(() => {
+    // Only scroll on initial load, not on every message update (streaming)
     scrollToBottom();
-  }, [messages]);
-
-  // Load initial chat messages
-  useEffect(() => {
-    if (initialChat) {
-      setMessages(initialChat.messages);
-      setCurrentChatId(initialChat._id);
-    }
-  }, [initialChat]);
+  }, []); // Removed [messages] dependency
 
   const handleMessageSubmit = async (query: string) => {
     if (!query.trim() || isStreaming) return;
@@ -54,6 +47,10 @@ export function ChatInterface({ initialChat }: ChatInterfaceProps = {}) {
     // Add user message
     const userMessage = { role: 'user' as const, content: query };
     setMessages(prev => [...prev, userMessage]);
+
+    // Scroll to bottom when user sends message
+    setTimeout(scrollToBottom, 100);
+
     setIsStreaming(true);
     setLoadingAction('thinking'); // General loading state
 
@@ -323,15 +320,12 @@ export function ChatInterface({ initialChat }: ChatInterfaceProps = {}) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col group" style={{ background: 'var(--background)' }}>
+    <div className="flex min-h-screen flex-col bg-slate-50/50">
       {/* Chat Title (if loading existing chat) */}
       {initialChat && (
-        <div className="sticky top-0 z-10" style={{
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--background)'
-        }}>
-          <div className="mx-auto max-w-3xl px-6 py-3">
-            <h2 className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
+        <div className="sticky top-[70px] z-10 border-b border-gray-100 bg-white/95 backdrop-blur-md shadow-sm">
+          <div className="mx-auto max-w-3xl px-4 py-2.5">
+            <h2 className="text-sm font-medium truncate text-gray-700">
               {initialChat.title}
             </h2>
           </div>
@@ -340,90 +334,83 @@ export function ChatInterface({ initialChat }: ChatInterfaceProps = {}) {
 
       {/* Messages */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-4 py-5">
           {messages.length === 0 ? (
-            <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-              <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-full" style={{
-                background: 'var(--accent)',
-                boxShadow: 'var(--shadow-md)'
-              }}>
-                <svg
-                  className="h-8 w-8"
-                  style={{ color: 'var(--accent-foreground)' }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                  />
-                </svg>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-xl mx-auto">
+
+              {/* Logo/Icon */}
+              <div className="mb-6 relative">
+                <div className="absolute -inset-4 bg-orange-100/50 rounded-full blur-xl"></div>
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl shadow-orange-200">
+                  <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
               </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight" style={{ color: 'var(--foreground)' }}>
-                Ask about UOL programs
+
+              <h2 className="mb-2 text-xl font-bold tracking-tight text-gray-900 text-center">
+                How can I help you today?
               </h2>
-              <p className="max-w-md text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                Get information about admissions, requirements, scholarships, and more.
+              <p className="mb-6 text-gray-500 text-center max-w-sm text-sm">
+                Ask about UOL admissions, scholarship criteria, or program details.
               </p>
-              <div className="mt-8 grid gap-3 text-left">
+
+              <div className="grid w-full gap-3 sm:grid-cols-2">
                 <button
                   onClick={() => handleSubmit('What are the requirements for computer science?')}
-                  className="px-5 py-3 text-sm font-medium transition-all hover:scale-[1.02]"
-                  style={{
-                    background: 'var(--secondary)',
-                    color: 'var(--secondary-foreground)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
+                  className="group flex flex-col items-start gap-2 rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-orange-200 hover:bg-orange-50/30 text-left"
                 >
-                  What are the requirements for computer science?
+                  <div className="rounded-full bg-blue-50 p-1.5 text-blue-600 group-hover:bg-blue-100 transition-colors">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-semibold text-gray-900">Program Requirements</span>
+                    <span className="text-xs text-gray-500">Check eligibility for CS</span>
+                  </div>
                 </button>
+
                 <button
                   onClick={() => handleSubmit('Tell me about scholarships for 90% marks')}
-                  className="px-5 py-3 text-sm font-medium transition-all hover:scale-[1.02]"
-                  style={{
-                    background: 'var(--secondary)',
-                    color: 'var(--secondary-foreground)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
+                  className="group flex flex-col items-start gap-2 rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-orange-200 hover:bg-orange-50/30 text-left"
                 >
-                  Tell me about scholarships for 90% marks
+                  <div className="rounded-full bg-green-50 p-1.5 text-green-600 group-hover:bg-green-100 transition-colors">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-semibold text-gray-900">Scholarships</span>
+                    <span className="text-xs text-gray-500">Find financial aid options</span>
+                  </div>
                 </button>
+
                 <button
                   onClick={() => handleSubmit('What is the MBA program duration?')}
-                  className="px-5 py-3 text-sm font-medium transition-all hover:scale-[1.02]"
-                  style={{
-                    background: 'var(--secondary)',
-                    color: 'var(--secondary-foreground)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}
+                  className="group flex flex-col items-start gap-2 rounded-xl bg-white p-3.5 shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-orange-200 hover:bg-orange-50/30 text-left"
                 >
-                  What is the MBA program duration?
+                  <div className="rounded-full bg-purple-50 p-1.5 text-purple-600 group-hover:bg-purple-100 transition-colors">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-semibold text-gray-900">Program Duration</span>
+                    <span className="text-xs text-gray-500">Details about MBA</span>
+                  </div>
                 </button>
+
                 <button
                   onClick={() => handleMessageSubmit('I want to apply for admission')}
-                  className="px-5 py-3 text-sm font-medium transition-all hover:scale-[1.02] flex items-center justify-between group/btn"
-                  style={{
-                    background: 'var(--primary)',
-                    color: 'var(--primary-foreground)',
-                    borderRadius: 'var(--radius-lg)',
-                    boxShadow: 'var(--shadow-md)'
-                  }}
+                  className="group flex flex-col items-start gap-2 rounded-xl bg-orange-50 p-3.5 shadow-sm ring-1 ring-orange-200 transition-all hover:shadow-md hover:bg-orange-100 hover:ring-orange-300 text-left"
                 >
-                  <span>Start Admission Application</span>
-                  <svg className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                  <div className="rounded-full bg-orange-100 p-1.5 text-orange-600 group-hover:bg-orange-200 transition-colors">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-semibold text-orange-900">Start Application</span>
+                    <span className="text-xs text-orange-700/80">Begin admission process</span>
+                  </div>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-8 pb-4">
               {messages.map((message, index) => (
                 <Message key={index} message={message} />
               ))}
@@ -474,16 +461,16 @@ export function ChatInterface({ initialChat }: ChatInterfaceProps = {}) {
       </main>
 
       {/* Input */}
-      <div className="sticky bottom-0" style={{
-        borderTop: '1px solid var(--border)',
-        background: 'var(--background)'
-      }}>
-        <div className="mx-auto max-w-3xl px-6 py-4">
+      <div className="sticky bottom-0 z-20 bg-white/80 backdrop-blur-lg border-t border-gray-100">
+        <div className="mx-auto max-w-3xl px-4 py-4">
           <ChatInput
             onSubmit={handleMessageSubmit}
             onUpload={handleUpload}
             isStreaming={isStreaming}
           />
+          <div className="mt-1.5 text-center">
+            <p className="text-[10px] text-gray-400">AI can make mistakes. Please verify important information.</p>
+          </div>
         </div>
       </div>
     </div>

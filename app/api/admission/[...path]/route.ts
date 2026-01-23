@@ -34,7 +34,30 @@ async function handler(request: NextRequest, props: { params: Promise<{ path: st
       body: body,
     });
 
-    // Handle 204 No Content or empty responses
+    // Check if response is a PDF (binary)
+    const responseContentType = response.headers.get('content-type');
+    
+    if (responseContentType?.includes('application/pdf')) {
+      // Handle PDF binary response
+      const pdfData = await response.arrayBuffer();
+      const contentDisposition = response.headers.get('content-disposition');
+      
+      const responseHeaders: Record<string, string> = {
+        'Content-Type': 'application/pdf',
+        'Content-Length': pdfData.byteLength.toString(),
+      };
+      
+      if (contentDisposition) {
+        responseHeaders['Content-Disposition'] = contentDisposition;
+      }
+      
+      return new Response(pdfData, {
+        status: response.status,
+        headers: responseHeaders,
+      });
+    }
+
+    // Handle 204 No Content or empty responses for JSON
     const responseText = await response.text();
     let data = null;
     try {
@@ -63,3 +86,4 @@ async function handler(request: NextRequest, props: { params: Promise<{ path: st
 }
 
 export { handler as GET, handler as POST };
+
