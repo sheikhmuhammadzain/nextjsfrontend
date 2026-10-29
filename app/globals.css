@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+:root {
+  /* Minimal Color Palette */
+  --background: #ffffff;
+  --foreground: #000000;
+  
+  /* Primary Orange */
+  --primary: #FF5722;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary / Accents */
+  --secondary: #f5f5f5;
+  --secondary-foreground: #000000;
+  
+  --muted: #f0f0f0;
+  --muted-foreground: #666666;
+  
+  --accent: #fff0e6; /* Very light orange for backgrounds */
+  --accent-foreground: #FF5722;
+  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #FF5722;
+  
+  --radius: 0.5rem;
+  
+  /* Fonts */
+  --font-sans: var(--font-sans), sans-serif;
+  --font-serif: var(--font-serif), serif;
+  --font-mono: var(--font-mono), monospace;
+
+  /* Shadows - Minimal */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+  
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Markdown prose styling */
+.prose {
+  max-width: none;
+  color: var(--foreground);
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  line-height: 1.7;
+}
+
+.prose strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-serif);
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.prose code {
+  background: var(--muted);
+  color: var(--foreground);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+}
+
+.prose a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+
+/* Custom Animations */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: enter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
